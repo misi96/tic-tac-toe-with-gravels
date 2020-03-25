@@ -20,11 +20,12 @@
     name: 'Board',
     props: {
       state: Array,
-      isEndGame: Boolean
+      hasWinner: Boolean,
+      currentPlayer: Number
     },
     methods: {
       handleFieldClick(row, column) {
-        if(!this.isEndGame) {
+        if(!this.hasWinner && this.currentPlayer !== 1) {
           this.$emit('on-field-click', {row, column})
         }
       },

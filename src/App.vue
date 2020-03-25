@@ -12,7 +12,8 @@
 
     <div id="board-container">
       <board :state="state"
-             :is-end-game="winner"
+             :has-winner="!!winner"
+             :current-player="currentPlayer"
              @on-field-click="handleFieldClick"/>
     </div>
   </div>
@@ -28,7 +29,7 @@ export default {
   },
   data() {
     return {
-      currentPlayer: 1,
+      currentPlayer: 2,
       winner: null,
       state: [
         ['0', '0', '0'],
@@ -61,6 +62,10 @@ export default {
         this.showGameResult()
       }
       this.switchPlayer()
+
+      if(this.currentPlayer === 1) {
+        setTimeout(() => {this.makeAIStep()}, 1000)
+      }
     },
     showGameResult() {
       const title = this.winner === 2 ? 'Győzelem' : 'Vereség'
@@ -98,6 +103,12 @@ export default {
     resetGame() {
       this.winner = null
       this.state = [['0', '0', '0'], ['0', '0', '0'], ['0', '0', '0']]
+    },
+    makeAIStep() {
+      const row = Math.floor(Math.random() * 3);
+      const column = Math.floor(Math.random() * 3);
+
+      this.addGravel({row, column})
     }
   }
 }
