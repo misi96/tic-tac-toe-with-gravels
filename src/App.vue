@@ -63,7 +63,7 @@ export default {
       }
       this.switchPlayer()
 
-      if(this.currentPlayer === 1) {
+      if(this.currentPlayer === 1 && !this.winner) {
         setTimeout(() => {this.makeAIStep()}, 1000)
       }
     },
