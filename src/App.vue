@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import Board from './components/board/index';
+import Board from './board/index';
 
 export default {
   name: 'App',
