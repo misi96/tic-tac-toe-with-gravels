@@ -5,7 +5,9 @@
     <h3>Szatmári Mihály</h3>
 
     <div id="new-game-button">
-      <el-button type="primary" @click="resetGame">
+      <el-button type="primary"
+                 :loading="isLoading"
+                 @click="resetGame">
         Új játék
       </el-button>
     </div>
@@ -36,6 +38,11 @@ export default {
         ['0', '0', '0'],
         ['0', '0', '0'],
       ]
+    }
+  },
+  computed: {
+    isLoading() {
+      return this.currentPlayer === 1 && !this.winner
     }
   },
   methods: {
@@ -102,6 +109,7 @@ export default {
     },
     resetGame() {
       this.winner = null
+      this.currentPlayer = 2
       this.state = [['0', '0', '0'], ['0', '0', '0'], ['0', '0', '0']]
     },
     makeAIStep() {
