@@ -5,10 +5,10 @@
         <td v-for="(value, j) in row"
             :key="j"
             @click="handleFieldClick(i, j)">
-          <el-button :type="getButtonType(i, j)"
+          <el-avatar :icon="getGravelIcon(i, j)"
                      :class="{ hidden: isEmptyCell(i, j) }"
-                     icon="el-icon-user-solid"
-                     circle/>
+                     :style="{ background: getGravelColor(i, j) }"/>
+
         </td>
       </tr>
     </table>
@@ -19,23 +19,29 @@
   export default {
     name: 'Board',
     props: {
-      state: Array
+      state: Array,
+      isEndGame: Boolean
     },
     methods: {
       handleFieldClick(row, column) {
-        this.$emit('on-field-click', {row, column})
+        if(!this.isEndGame) {
+          this.$emit('on-field-click', {row, column})
+        }
       },
       isEmptyCell(row, column) {
-        return this.state[row][column] === 0
+        return this.state[row][column] === '0'
       },
-      getButtonType(row, column) {
-        switch (this.state[row][column]) {
-          case 1:
-            return 'danger'
-          case 2:
-            return 'warning'
-          case 3:
-            return 'success'
+      getGravelIcon(row, column) {
+        return `el-icon-${this.state[row][column][0] === '1' ? 's-tools' : 'user-solid'}`
+      },
+      getGravelColor(row, column) {
+        switch (this.state[row][column].slice(-1)) {
+          case 'r':
+            return 'red'
+          case 'o':
+            return 'orange'
+          case 'g':
+            return 'green'
         }
       }
     }

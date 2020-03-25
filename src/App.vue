@@ -11,7 +11,9 @@
     </div>
 
     <div id="board-container">
-      <board :state="state" @on-field-click="handleFieldClick"/>
+      <board :state="state"
+             :is-end-game="winner"
+             @on-field-click="handleFieldClick"/>
     </div>
   </div>
 </template>
@@ -26,45 +28,48 @@ export default {
   },
   data() {
     return {
-      isWin: false,
-      gravels: [1, 2, 3],
+      currentPlayer: 1,
+      winner: null,
       state: [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0]
+        ['0', '0', '0'],
+        ['0', '0', '0'],
+        ['0', '0', '0'],
       ]
     }
   },
-  mounted() {
-  },
   methods: {
+    switchPlayer() {
+      this.currentPlayer = this.currentPlayer === 1 ? 2 : 1
+    },
     handleFieldClick(coordinates) {
       this.addGravel(coordinates)
     },
     addGravel({row, column}) {
-      switch (this.state[row][column]) {
-        case 0:
-          this.state[row][column] = 1
+      switch (this.state[row][column].slice(-1)) {
+        case '0':
+          this.state[row][column] = `${this.currentPlayer}r`
           break
-        case 1:
-          this.state[row][column] = 2
+        case 'r':
+          this.state[row][column] = `${this.currentPlayer}o`
           break
-        case 2:
-          this.state[row][column] = 3
+        case 'o':
+          this.state[row][column] = `${this.currentPlayer}g`
           break
       }
       this.state = [...this.state]
-      this.showGameResult()
+      if(this.isGoalState(this.state)) {
+        this.showGameResult()
+      }
+      this.switchPlayer()
     },
     showGameResult() {
-      if(this.isGoalState(this.state)) {
-        this.$confirm('Gratulálok, te győztél!', 'Győzelem', {
-          confirmButtonText: 'Új játék',
-          cancelButtonText: 'Mégsem',
-          type: 'success'
-        })
-          .then(() => this.state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-      }
+      const title = this.winner === 2 ? 'Győzelem' : 'Vereség'
+      const message = this.winner === 2 ? 'Gratulálok, győztél!' : 'Sajnálom, vesztettél!'
+
+      this.$alert(message, title, {
+        confirmButtonText: 'Bezárás',
+        type: `${this.winner === 2 ? 'success' : 'error'}`
+      })
     },
     isGoalState(state) {
       return this.hasDiagonalGoalValues(state) ||
@@ -85,10 +90,14 @@ export default {
       return columns.some(column => this.areGoalValues(column))
     },
     areGoalValues(values) {
-      return values.every(value => value === values[0] && value !== 0)
+      const isGoal = values.every(value => value === values[0] && value !== '0')
+      this.winner = isGoal ? +values[0][0] : null
+
+      return isGoal
     },
     resetGame() {
-      this.state = [[0,0,0], [0,0,0], [0,0,0]]
+      this.winner = null
+      this.state = [['0', '0', '0'], ['0', '0', '0'], ['0', '0', '0']]
     }
   }
 }
