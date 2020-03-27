@@ -68,6 +68,7 @@
     background: lightgrey;
     cursor: pointer;
     transition: 0.3s;
+
     &:hover {
       background: wheat;
     }

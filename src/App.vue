@@ -29,6 +29,7 @@
 
 <script>
 import Board from './board/index';
+import {getDefaultState, getNewState, getWinner, Players} from './state';
 
 export default {
   name: 'App',
@@ -37,19 +38,15 @@ export default {
   },
   data() {
     return {
-      isGameStarted: false,
-      currentPlayer: 2,
       winner: null,
-      state: [
-        ['0', '0', '0'],
-        ['0', '0', '0'],
-        ['0', '0', '0'],
-      ]
+      isGameStarted: false,
+      currentPlayer: Players.HUMAN,
+      state: getDefaultState()
     }
   },
   computed: {
     isLoading() {
-      return this.currentPlayer === 1 && !this.winner
+      return this.currentPlayer === Players.AI && !this.winner
     },
     currentPlayerText() {
       return !this.isLoading ? 'Te következel' : 'Az ellenfél következik'
@@ -57,35 +54,22 @@ export default {
   },
   methods: {
     switchPlayer() {
-      this.currentPlayer = this.currentPlayer === 1 ? 2 : 1
+      const {AI, HUMAN} = Players
+      this.currentPlayer = this.currentPlayer === AI ? HUMAN : AI
     },
     handleFieldClick(coordinates) {
       this.addGravel(coordinates)
     },
     addGravel({row, column}) {
-      switch (this.state[row][column].slice(-1)) {
-        case '0':
-          this.state[row][column] = `${this.currentPlayer}r`
-          break
-        case 'r':
-          this.state[row][column] = `${this.currentPlayer}o`
-          break
-        case 'o':
-          this.state[row][column] = `${this.currentPlayer}g`
-          break
-      }
-      this.state = [...this.state]
-      if(this.isGoalState(this.state)) {
-        this.showGameResult()
-      }
-      this.switchPlayer()
-
-      if(this.currentPlayer === 1 && !this.winner) {
-        setTimeout(() => {this.makeAIStep()}, 1000)
+      this.makeStep(row, column)
+      if(!this.winner) {
+        this.makeAIStep()
       }
     },
     showGameResult() {
-      const title = this.winner === 2 ? 'Győzelem' : 'Vereség'
+      const title = this.winner === Players.BOTH ?
+        'Döntetlen'
+        : this.winner === Players.HUMAN ? 'Győzelem' : 'Vereség'
       const message = this.winner === 2 ? 'Gratulálok, győztél!' : 'Sajnálom, vesztettél!'
 
       this.$alert(message, title, {
@@ -93,35 +77,11 @@ export default {
         type: `${this.winner === 2 ? 'success' : 'error'}`
       })
     },
-    isGoalState(state) {
-      return this.hasDiagonalGoalValues(state) ||
-        this.hasRowGoalValues(state) ||
-        this.hasColumnGoalValues(state)
-    },
-    hasDiagonalGoalValues(state) {
-      const leftDiagonalValues = state.map((row, i) => state[i][i])
-      const rightDiagonalValues = state.map((row, i) => state[i][state.length - 1 - i])
-
-      return this.areGoalValues(leftDiagonalValues) || this.areGoalValues(rightDiagonalValues)
-    },
-    hasRowGoalValues(state) {
-      return state.some(row => this.areGoalValues(row))
-    },
-    hasColumnGoalValues(state) {
-      const columns = state.map((row, i) => row.map((value, j) => state[j][i]))
-      return columns.some(column => this.areGoalValues(column))
-    },
-    areGoalValues(values) {
-      const isGoal = values.every(value => value === values[0] && value !== '0')
-      this.winner = isGoal ? +values[0][0] : null
-
-      return isGoal
-    },
     startGame() {
       if(this.isGameStarted) {
         this.winner = null
         this.currentPlayer = 2
-        this.state = [['0', '0', '0'], ['0', '0', '0'], ['0', '0', '0']]
+        this.state = getDefaultState()
       } else {
         this.isGameStarted = true
       }
@@ -130,7 +90,12 @@ export default {
       const row = Math.floor(Math.random() * 3);
       const column = Math.floor(Math.random() * 3);
 
-      this.addGravel({row, column})
+      setTimeout(() => this.makeStep(row, column), 500)
+    },
+    makeStep(row, column) {
+      this.state = getNewState({row, column, state: this.state, player: this.currentPlayer})
+      this.winner = getWinner(this.state)
+      this.winner ? this.showGameResult() : this.switchPlayer()
     }
   }
 }
