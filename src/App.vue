@@ -5,18 +5,24 @@
     <h3>Szatmári Mihály</h3>
 
     <div id="new-game-button">
-      <el-button type="primary"
-                 :loading="isLoading"
-                 @click="resetGame">
-        Új játék
+      <el-button type="success"
+                 @click="startGame">
+        {{`${isGameStarted ? 'Új játék' : 'Játék indítása'}`}}
       </el-button>
     </div>
 
-    <div id="board-container">
-      <board :state="state"
-             :has-winner="!!winner"
-             :current-player="currentPlayer"
-             @on-field-click="handleFieldClick"/>
+    <div v-if="isGameStarted">
+      <p v-if="!winner">
+        <i v-if="isLoading" id="loading-icon" class="el-icon-loading"/>
+        <span>{{ currentPlayerText }}</span>
+      </p>
+
+      <div id="board-container">
+        <board :state="state"
+               :has-winner="!!winner"
+               :current-player="currentPlayer"
+               @on-field-click="handleFieldClick"/>
+      </div>
     </div>
   </div>
 </template>
@@ -31,6 +37,7 @@ export default {
   },
   data() {
     return {
+      isGameStarted: false,
       currentPlayer: 2,
       winner: null,
       state: [
@@ -43,6 +50,9 @@ export default {
   computed: {
     isLoading() {
       return this.currentPlayer === 1 && !this.winner
+    },
+    currentPlayerText() {
+      return !this.isLoading ? 'Te következel' : 'Az ellenfél következik'
     }
   },
   methods: {
@@ -107,10 +117,14 @@ export default {
 
       return isGoal
     },
-    resetGame() {
-      this.winner = null
-      this.currentPlayer = 2
-      this.state = [['0', '0', '0'], ['0', '0', '0'], ['0', '0', '0']]
+    startGame() {
+      if(this.isGameStarted) {
+        this.winner = null
+        this.currentPlayer = 2
+        this.state = [['0', '0', '0'], ['0', '0', '0'], ['0', '0', '0']]
+      } else {
+        this.isGameStarted = true
+      }
     },
     makeAIStep() {
       const row = Math.floor(Math.random() * 3);
@@ -138,5 +152,9 @@ export default {
 
   #new-game-button {
     margin-bottom: 20px;
+  }
+
+  #loading-icon {
+    margin-right: 5px;
   }
 </style>

@@ -6,6 +6,7 @@
             :key="j"
             @click="handleFieldClick(i, j)">
           <el-avatar :icon="getGravelIcon(i, j)"
+                     class="animated"
                      :class="{ hidden: isEmptyCell(i, j) }"
                      :style="{ background: getGravelColor(i, j) }"/>
 
@@ -26,7 +27,9 @@
     methods: {
       handleFieldClick(row, column) {
         if(!this.hasWinner && this.currentPlayer !== 1) {
-          this.$emit('on-field-click', {row, column})
+          this.state[row][column].slice(-1) !== 'g'
+            ? this.$emit('on-field-click', {row, column})
+            : this.$message.warning('Oda nem léphetsz!')
         }
       },
       isEmptyCell(row, column) {
@@ -49,7 +52,7 @@
   }
 </script>
 
-<style scoped lang="css">
+<style scoped lang="scss">
   table {
     width: 450px;
     height: 450px;
@@ -64,6 +67,10 @@
   td {
     background: lightgrey;
     cursor: pointer;
+    transition: 0.3s;
+    &:hover {
+      background: wheat;
+    }
   }
 
   .board-container {
@@ -74,5 +81,9 @@
 
   .hidden {
     visibility: hidden;
+  }
+
+  .animated {
+    transition: 0.3s;
   }
 </style>
