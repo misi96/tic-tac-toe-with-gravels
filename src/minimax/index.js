@@ -1,4 +1,5 @@
-import {getNewState, getWinner, isGreenStone, Players} from '../state';
+import {getNewState, getWinner, isGreenStone} from '../state';
+import {Players} from '../models';
 
 export function getBestMove(state) {
   let bestScore = -Infinity;

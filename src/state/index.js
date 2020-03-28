@@ -1,24 +1,26 @@
+import {Gravels, Players} from '../models';
+
 export function getNewState({row, column, state, player}) {
   const color = state[row][column].slice(-1)
-  const stateCopy = JSON.parse(JSON.stringify(state))
+  const {EMPTY, RED, ORANGE, GREEN} = Gravels
 
   switch (color) {
-    case '0':
-      stateCopy[row][column] = `${player}r`
+    case EMPTY:
+      state[row][column] = `${player}${RED}`
       break
-    case 'r':
-      stateCopy[row][column] = `${player}o`
+    case RED:
+      state[row][column] = `${player}${ORANGE}`
       break
-    case 'o':
-      stateCopy[row][column] = `${player}g`
+    case ORANGE:
+      state[row][column] = `${player}${GREEN}`
       break
   }
 
-  return JSON.parse(JSON.stringify(stateCopy))
+  return JSON.parse(JSON.stringify(state))
 }
 
 export function isGreenStone(row, column, state) {
-  return state[row][column].slice(-1) === 'g'
+  return state[row][column].slice(-1) === Gravels.GREEN
 }
 
 export function getWinner(state) {
@@ -43,26 +45,22 @@ export function getColumnGoalValues(state) {
 }
 
 export function getGoalValues(values) {
-  const areGoalValues = values.every(value => value === values[0] && value !== '0')
+  const areGoalValues = values.every(value => value === values[0] && value !== Gravels.EMPTY)
   return areGoalValues ? values : null
 }
 
 export function getDefaultState() {
+  const {EMPTY} = Gravels
+
   const defaultState = [
-    ['0', '0', '0'],
-    ['0', '0', '0'],
-    ['0', '0', '0']
+    [EMPTY, EMPTY, EMPTY],
+    [EMPTY, EMPTY, EMPTY],
+    [EMPTY, EMPTY, EMPTY]
   ]
 
   return JSON.parse(JSON.stringify(defaultState))
 }
 
 export function isTie(state) {
-  return state.every(row => row.every(value => value.slice(-1) === 'g'))
-}
-
-export const Players = {
-  AI: 1,
-  HUMAN: 2,
-  BOTH: 3
+  return state.every(row => row.every(value => value.slice(-1) === Gravels.GREEN))
 }

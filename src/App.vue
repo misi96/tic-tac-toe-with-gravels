@@ -29,7 +29,8 @@
 
 <script>
 import Board from './board/index';
-import {getDefaultState, getNewState, getWinner, Players} from './state';
+import {getDefaultState, getNewState, getWinner} from './state';
+import {Players} from './models';
 
 export default {
   name: 'App',
