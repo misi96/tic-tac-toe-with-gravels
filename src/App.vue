@@ -24,7 +24,7 @@
     <div v-if="isGameStarted">
       <div id="board-container">
         <board :state="state"
-               :has-winner="winner"
+               :winner="winner"
                :current-player="currentPlayer"
                @on-field-click="handleFieldClick"/>
       </div>

@@ -1,4 +1,4 @@
-import {getNewState, getWinner, isGreenStone} from '../state';
+import {getNewState, getWinner, isGravelGreen} from '../state';
 import {Players} from '../models';
 
 export function getBestMove(state) {
@@ -6,7 +6,7 @@ export function getBestMove(state) {
   let move;
   for (let row = 0; row < 3; row++) {
     for (let column = 0; column < 3; column++) {
-      if (!isGreenStone(row, column, state)) {
+      if (!isGravelGreen(row, column, state)) {
         const newState = getNewState({row, column, state, player: Players.AI})
         let score = minimax(newState, 0, false, -Infinity, Infinity);
         if (score > bestScore) {
@@ -31,7 +31,7 @@ function minimax(state, depth, isMaximizing, alpha, beta) {
     let bestScore = -Infinity;
     for (let row = 0; row < 3; row++) {
       for (let column = 0; column < 3; column++) {
-        if (!isGreenStone(row, column, state)) {
+        if (!isGravelGreen(row, column, state)) {
           const newState = getNewState({row, column, state, player: Players.AI})
           let score = minimax(newState, depth + 1, false, alpha, beta);
           bestScore = Math.max(score, bestScore);
@@ -47,7 +47,7 @@ function minimax(state, depth, isMaximizing, alpha, beta) {
     let bestScore = Infinity;
     for (let row = 0; row < 3; row++) {
       for (let column = 0; column < 3; column++) {
-        if (!isGreenStone(row, column, state)) {
+        if (!isGravelGreen(row, column, state)) {
           const newState = getNewState({row, column, state, player: Players.HUMAN})
           let score = minimax(newState, depth + 1, true, alpha, beta);
           bestScore = Math.min(score, bestScore);

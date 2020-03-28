@@ -15,7 +15,7 @@
 
 <script>
   import {Gravels, Players} from '../models';
-import {isGreenStone} from '../state';
+import {isGravelGreen} from '../state';
 
 export default {
   name: 'Board',
@@ -27,7 +27,7 @@ export default {
   methods: {
     handleFieldClick(row, column) {
       const isClickEnabled = !this.winner && this.currentPlayer === Players.HUMAN
-      const isStoneGreen = isGreenStone(row, column, this.state)
+      const isStoneGreen = isGravelGreen(row, column, this.state)
 
       if(isClickEnabled) {
         !isStoneGreen ? this.emitCoordinates({row, column}) : this.showInvalidStepMessage()

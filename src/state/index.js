@@ -19,7 +19,7 @@ export function getNewState({row, column, state, player}) {
   return JSON.parse(JSON.stringify(state))
 }
 
-export function isGreenStone(row, column, state) {
+export function isGravelGreen(row, column, state) {
   return state[row][column].slice(-1) === Gravels.GREEN
 }
 
