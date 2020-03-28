@@ -1,15 +1,12 @@
 <template>
-  <div class="board-container">
+  <div id="board-container">
     <table>
       <tr v-for="(row, i) in state" :key="i">
-        <td v-for="(value, j) in row"
-            :key="j"
-            @click="handleFieldClick(i, j)">
+        <td v-for="(value, j) in row" :key="j" @click="handleFieldClick(i, j)">
           <el-avatar :icon="getGravelIcon(i, j)"
                      class="animated"
                      :class="{ hidden: isEmptyCell(i, j) }"
                      :style="{ background: getGravelColor(i, j) }"/>
-
         </td>
       </tr>
     </table>
@@ -17,39 +14,50 @@
 </template>
 
 <script>
-  export default {
-    name: 'Board',
-    props: {
-      state: Array,
-      hasWinner: Boolean,
-      currentPlayer: Number
+  import {Gravels, Players} from '../models';
+import {isGreenStone} from '../state';
+
+export default {
+  name: 'Board',
+  props: {
+    state: Array,
+    winner: Number,
+    currentPlayer: Number
+  },
+  methods: {
+    handleFieldClick(row, column) {
+      const isClickEnabled = !this.winner && this.currentPlayer === Players.HUMAN
+      const isStoneGreen = isGreenStone(row, column, this.state)
+
+      if(isClickEnabled) {
+        !isStoneGreen ? this.emitCoordinates({row, column}) : this.showInvalidStepMessage()
+      }
     },
-    methods: {
-      handleFieldClick(row, column) {
-        if(!this.hasWinner && this.currentPlayer !== 1) {
-          this.state[row][column].slice(-1) !== 'g'
-            ? this.$emit('on-field-click', {row, column})
-            : this.$message.warning('Oda nem léphetsz!')
-        }
-      },
-      isEmptyCell(row, column) {
-        return this.state[row][column] === '0'
-      },
-      getGravelIcon(row, column) {
-        return `el-icon-${this.state[row][column][0] === '1' ? 's-tools' : 'user-solid'}`
-      },
-      getGravelColor(row, column) {
-        switch (this.state[row][column].slice(-1)) {
-          case 'r':
-            return 'red'
-          case 'o':
-            return 'orange'
-          case 'g':
-            return 'green'
-        }
+    emitCoordinates(coordinates) {
+      this.$emit('on-field-click', coordinates)
+    },
+    showInvalidStepMessage() {
+      this.$message.warning('Oda nem léphetsz!')
+    },
+    isEmptyCell(row, column) {
+      return this.state[row][column] === Gravels.EMPTY
+    },
+    getGravelIcon(row, column) {
+      const isAIGravel = +this.state[row][column][0] === Players.AI
+      return `el-icon-${isAIGravel? 's-tools' : 'user-solid'}`
+    },
+    getGravelColor(row, column) {
+      switch (this.state[row][column].slice(-1)) {
+        case Gravels.RED:
+          return 'red'
+        case Gravels.ORANGE:
+          return 'orange'
+        case Gravels.GREEN:
+          return 'green'
       }
     }
   }
+}
 </script>
 
 <style scoped lang="scss">
@@ -74,7 +82,7 @@
     }
   }
 
-  .board-container {
+  #board-container {
     display: grid;
     grid-gap: 10px;
     justify-content: center;

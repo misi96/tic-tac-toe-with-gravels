@@ -4,22 +4,27 @@
     <h2>2. feladat - Amőba kavicsokkal</h2>
     <h3>Szatmári Mihály</h3>
 
-    <div id="new-game-button">
-      <el-button type="success"
-                 @click="startGame">
-        {{`${isGameStarted ? 'Új játék' : 'Játék indítása'}`}}
-      </el-button>
+    <el-button v-if="!isGameStarted" type="success" @click="startGame">
+      Játék indítása
+    </el-button>
+
+    <div v-if="isGameStarted" id="board-header-container">
+      <div id="board-header">
+        <el-button type="success" @click="resetGame">
+          Új játék
+        </el-button>
+
+        <div v-if="!winner">
+          <i v-if="isLoading" id="loading-icon" class="el-icon-loading"/>
+          <span>{{ currentPlayerText }}</span>
+        </div>
+      </div>
     </div>
 
     <div v-if="isGameStarted">
-      <p v-if="!winner">
-        <i v-if="isLoading" id="loading-icon" class="el-icon-loading"/>
-        <span>{{ currentPlayerText }}</span>
-      </p>
-
       <div id="board-container">
         <board :state="state"
-               :has-winner="!!winner"
+               :has-winner="winner"
                :current-player="currentPlayer"
                @on-field-click="handleFieldClick"/>
       </div>
@@ -55,42 +60,40 @@ export default {
   },
   methods: {
     switchPlayer() {
-      const {AI, HUMAN} = Players
+      const { AI, HUMAN } = Players
       this.currentPlayer = this.currentPlayer === AI ? HUMAN : AI
     },
-    handleFieldClick(coordinates) {
-      this.addGravel(coordinates)
-    },
-    addGravel({row, column}) {
+    handleFieldClick({row, column}) {
       this.makeStep(row, column)
       if(!this.winner) {
         this.makeAIStep()
       }
     },
     showGameResult() {
-      const title = this.winner === Players.BOTH ?
-        'Döntetlen'
-        : this.winner === Players.HUMAN ? 'Győzelem' : 'Vereség'
-      const message = this.winner === 2 ? 'Gratulálok, győztél!' : 'Sajnálom, vesztettél!'
-
-      this.$alert(message, title, {
-        confirmButtonText: 'Bezárás',
-        type: `${this.winner === 2 ? 'success' : 'error'}`
-      })
+      const { title, message, type } = this.getResultDialogText()
+      this.$alert(message, title, { confirmButtonText: 'Bezárás',  type: type })
+    },
+    getResultDialogText() {
+      switch (this.winner) {
+        case Players.HUMAN:
+          return { title: 'Győzelem', message: 'Gratulálok, győztél!', type: 'success' }
+        case Players.AI:
+          return { title: 'Vereség', message: 'Sajnálom, vesztettél!', type: 'error' }
+        case Players.BOTH:
+          return { title: 'Döntetlen', message: 'A játék eredménye döntetlen', type: 'warning' }
+      }
     },
     startGame() {
-      if(this.isGameStarted) {
-        this.winner = null
-        this.currentPlayer = 2
-        this.state = getDefaultState()
-      } else {
-        this.isGameStarted = true
-      }
+      this.isGameStarted = true
+    },
+    resetGame() {
+      this.winner = null
+      this.currentPlayer = 2
+      this.state = getDefaultState()
     },
     makeAIStep() {
       const row = Math.floor(Math.random() * 3);
       const column = Math.floor(Math.random() * 3);
-
       setTimeout(() => this.makeStep(row, column), 500)
     },
     makeStep(row, column) {
@@ -116,8 +119,17 @@ export default {
     display: grid;
   }
 
-  #new-game-button {
+  #board-header-container {
+    display: grid;
+    justify-content: space-around;
     margin-bottom: 20px;
+  }
+
+  #board-header {
+    width: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   #loading-icon {
