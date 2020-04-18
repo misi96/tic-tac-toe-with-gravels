@@ -34,7 +34,7 @@
 
 <script>
 import Board from './board/index';
-import {getDefaultState, getNewState, getWinner} from './state';
+import {getDefaultState, getNewState, getWinner, isGravelGreen} from './state';
 import {Players} from './models';
 
 export default {
@@ -66,7 +66,7 @@ export default {
     handleFieldClick({row, column}) {
       this.makeStep(row, column)
       if(!this.winner) {
-        this.makeAIStep()
+        setTimeout(() => this.makeAIStep(), 500)
       }
     },
     showGameResult() {
@@ -92,14 +92,38 @@ export default {
       this.state = getDefaultState()
     },
     makeAIStep() {
-      const row = Math.floor(Math.random() * 3);
-      const column = Math.floor(Math.random() * 3);
-      setTimeout(() => this.makeStep(row, column), 500)
+      const {row, column} = this.getValidSteps()
+      this.makeStep(row, column)
     },
     makeStep(row, column) {
       this.state = getNewState({row, column, state: this.state, player: this.currentPlayer})
       this.winner = getWinner(this.state)
       this.winner ? this.showGameResult() : this.switchPlayer()
+    },
+    getValidSteps() {
+      let hasFoundValidStep = false
+      let coordinates = this.getRandomSteps()
+      const state = JSON.parse(JSON.stringify(this.state))
+
+      while (!hasFoundValidStep) {
+        const {row, column} = coordinates
+
+        if(!isGravelGreen(row, column, state)) {
+          hasFoundValidStep = true
+        } else {
+          coordinates = this.getRandomSteps()
+        }
+      }
+
+      return coordinates
+    },
+    getRandomSteps() {
+      const row = this.getRandomIndex()
+      const column = this.getRandomIndex()
+      return { row, column }
+    },
+    getRandomIndex() {
+      return Math.floor(Math.random() * 3)
     }
   }
 }
