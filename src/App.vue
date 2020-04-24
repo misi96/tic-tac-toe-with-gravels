@@ -34,8 +34,16 @@
 
 <script>
 import Board from './board/index';
-import {getDefaultState, getNewState, getWinner, isGravelGreen} from './state';
+import {
+  getDeepCopy,
+  getDefaultState,
+  getLowestGravelToDropOn,
+  getNewState,
+  getWinner,
+  isGravelGreen
+} from './state';
 import {Players} from './models';
+import {getBestMove} from './minimax';
 
 export default {
   name: 'App',
@@ -92,7 +100,8 @@ export default {
       this.state = getDefaultState()
     },
     makeAIStep() {
-      const {row, column} = this.getValidSteps()
+      const gravel = getLowestGravelToDropOn(this.state)
+      const {row, column} = getBestMove(getDeepCopy(this.state), gravel)
       this.makeStep(row, column)
     },
     makeStep(row, column) {

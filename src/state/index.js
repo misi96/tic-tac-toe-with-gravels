@@ -16,16 +16,16 @@ export function getNewState({row, column, state, player}) {
       break
   }
 
-  return JSON.parse(JSON.stringify(state))
+  return getDeepCopy(state)
 }
 
 export function isGravelGreen(row, column, state) {
   return state[row][column].slice(-1) === Gravels.GREEN
 }
 
-export function getWinner(state) {
+export function getWinner(state, gravel) {
   const goalValues = getDiagonalGoalValues(state) || getRowGoalValues(state) || getColumnGoalValues(state)
-  return goalValues ? +goalValues[0][0] : isTie(state) ? Players.BOTH : null
+  return goalValues ? +goalValues[0][0] : isTie(state, gravel) ? Players.BOTH : null
 }
 
 export function getDiagonalGoalValues(state) {
@@ -58,9 +58,31 @@ export function getDefaultState() {
     [EMPTY, EMPTY, EMPTY]
   ]
 
-  return JSON.parse(JSON.stringify(defaultState))
+  return getDeepCopy(defaultState)
 }
 
-export function isTie(state) {
-  return state.every(row => row.every(value => value.slice(-1) === Gravels.GREEN))
+export function isTie(state, gravel) {
+  return state.every(row => row.every(value => gravel
+    ? value.slice(-1) !== gravel
+    : value.slice(-1) === Gravels.GREEN))
+}
+
+export function getDeepCopy(state) {
+  return JSON.parse(JSON.stringify(state))
+}
+
+export function doesStateContain(value, state) {
+  return state.some((row, i) => row.some((column, j) => state[i][j].includes(value)))
+}
+
+export function getLowestGravelToDropOn(state) {
+  if(doesStateContain(Gravels.EMPTY, state)) {
+    return Gravels.EMPTY
+  } else if (doesStateContain(Gravels.RED, state)) {
+    return Gravels.RED
+  } else if (doesStateContain(Gravels.ORANGE, state)) {
+    return Gravels.ORANGE
+  } else {
+    return Gravels.GREEN
+  }
 }
