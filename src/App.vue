@@ -74,7 +74,7 @@ export default {
     handleFieldClick({row, column}) {
       this.makeStep(row, column)
       if(!this.winner) {
-        setTimeout(() => this.makeAIStep(), 500)
+        setTimeout(() => this.makeAIStep(), 1000)
       }
     },
     showGameResult() {
