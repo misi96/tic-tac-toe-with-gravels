@@ -14,7 +14,7 @@
           Új játék
         </el-button>
 
-        <div v-if="!winner">
+        <div v-if="!hasWinner">
           <i v-if="isLoading" id="loading-icon" class="el-icon-loading"/>
           <span>{{ currentPlayerText }}</span>
         </div>
@@ -24,7 +24,7 @@
     <div v-if="isGameStarted">
       <div id="board-container">
         <board :state="state"
-               :winner="winner"
+               :has-winner="hasWinner"
                :current-player="currentPlayer"
                @on-field-click="handleFieldClick"/>
       </div>
@@ -39,8 +39,7 @@ import {
   getDefaultState,
   getLowestGravelToDropOn,
   getNewState,
-  getWinner,
-  isGravelGreen
+  hasWinner
 } from './state';
 import {Players} from './models';
 import {getBestMove} from './minimax';
@@ -52,7 +51,7 @@ export default {
   },
   data() {
     return {
-      winner: null,
+      hasWinner: false,
       isGameStarted: false,
       currentPlayer: Players.HUMAN,
       state: getDefaultState()
@@ -60,7 +59,7 @@ export default {
   },
   computed: {
     isLoading() {
-      return this.currentPlayer === Players.AI && !this.winner
+      return this.currentPlayer === Players.AI && !this.hasWinner
     },
     currentPlayerText() {
       return !this.isLoading ? 'Te következel' : 'Az ellenfél következik'
@@ -73,7 +72,7 @@ export default {
     },
     handleFieldClick({row, column}) {
       this.makeStep(row, column)
-      if(!this.winner) {
+      if(!this.hasWinner) {
         setTimeout(() => this.makeAIStep(), 1000)
       }
     },
@@ -82,20 +81,17 @@ export default {
       this.$alert(message, title, { confirmButtonText: 'Bezárás',  type: type })
     },
     getResultDialogText() {
-      switch (this.winner) {
-        case Players.HUMAN:
-          return { title: 'Győzelem', message: 'Gratulálok, győztél!', type: 'success' }
-        case Players.AI:
-          return { title: 'Vereség', message: 'Sajnálom, vesztettél!', type: 'error' }
-        case Players.BOTH:
-          return { title: 'Döntetlen', message: 'A játék eredménye döntetlen', type: 'warning' }
+      if(this.currentPlayer === Players.HUMAN) {
+        return { title: 'Győzelem', message: 'Gratulálok, győztél!', type: 'success' }
+      } else {
+        return { title: 'Vereség', message: 'Sajnálom, vesztettél!', type: 'error' }
       }
     },
     startGame() {
       this.isGameStarted = true
     },
     resetGame() {
-      this.winner = null
+      this.hasWinner = false
       this.currentPlayer = 2
       this.state = getDefaultState()
     },
@@ -106,33 +102,8 @@ export default {
     },
     makeStep(row, column) {
       this.state = getNewState({row, column, state: this.state, player: this.currentPlayer})
-      this.winner = getWinner(this.state)
-      this.winner ? this.showGameResult() : this.switchPlayer()
-    },
-    getValidSteps() {
-      let hasFoundValidStep = false
-      let coordinates = this.getRandomSteps()
-      const state = JSON.parse(JSON.stringify(this.state))
-
-      while (!hasFoundValidStep) {
-        const {row, column} = coordinates
-
-        if(!isGravelGreen(row, column, state)) {
-          hasFoundValidStep = true
-        } else {
-          coordinates = this.getRandomSteps()
-        }
-      }
-
-      return coordinates
-    },
-    getRandomSteps() {
-      const row = this.getRandomIndex()
-      const column = this.getRandomIndex()
-      return { row, column }
-    },
-    getRandomIndex() {
-      return Math.floor(Math.random() * 3)
+      this.hasWinner = hasWinner(this.state)
+      this.hasWinner ? this.showGameResult() : this.switchPlayer()
     }
   }
 }

@@ -1,4 +1,4 @@
-import {getDeepCopy, getNewState, getWinner} from '../state';
+import {getDeepCopy, getNewState, hasWinner} from '../state';
 import {Players} from '../models';
 
 export function getBestMove(state, gravel) {
@@ -19,12 +19,13 @@ export function getBestMove(state, gravel) {
   return move
 }
 
-let scores = [10, -10, 0];
+let scores = [10, -10];
 
 function minimax(state, depth, isMaximizing, alpha, beta, gravel) {
-  let result = getWinner(state, gravel);
-  if (result !== null) {
-    return scores[result - 1];
+  let result = hasWinner(state, gravel);
+  if (result) {
+    const winner = isMaximizing ? Players.HUMAN : Players.AI
+    return scores[winner - 1];
   }
 
   if (isMaximizing) {

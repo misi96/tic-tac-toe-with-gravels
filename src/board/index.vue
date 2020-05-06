@@ -3,8 +3,7 @@
     <table>
       <tr v-for="(row, i) in state" :key="i">
         <td v-for="(value, j) in row" :key="j" @click="handleFieldClick(i, j)">
-          <el-avatar :icon="getGravelIcon(i, j)"
-                     class="animated"
+          <el-avatar class="animated"
                      :class="{ hidden: isEmptyCell(i, j) }"
                      :style="{ background: getGravelColor(i, j) }"/>
         </td>
@@ -15,19 +14,18 @@
 
 <script>
   import {Gravels, Players} from '../models';
-import {isGravelGreen} from '../state';
 
 export default {
   name: 'Board',
   props: {
     state: Array,
-    winner: Number,
+    hasWinner: Boolean,
     currentPlayer: Number
   },
   methods: {
     handleFieldClick(row, column) {
-      const isClickEnabled = !this.winner && this.currentPlayer === Players.HUMAN
-      const isStoneGreen = isGravelGreen(row, column, this.state)
+      const isClickEnabled = !this.hasWinner && this.currentPlayer === Players.HUMAN
+      const isStoneGreen = this.state[row][column] === Gravels.GREEN
 
       if(isClickEnabled) {
         !isStoneGreen ? this.emitCoordinates({row, column}) : this.showInvalidStepMessage()
@@ -42,12 +40,8 @@ export default {
     isEmptyCell(row, column) {
       return this.state[row][column] === Gravels.EMPTY
     },
-    getGravelIcon(row, column) {
-      const isAIGravel = +this.state[row][column][0] === Players.AI
-      return `el-icon-${isAIGravel? 's-tools' : 'user-solid'}`
-    },
     getGravelColor(row, column) {
-      switch (this.state[row][column].slice(-1)) {
+      switch (this.state[row][column]) {
         case Gravels.RED:
           return 'red'
         case Gravels.ORANGE:

@@ -1,52 +1,45 @@
-import {Gravels, Players} from '../models';
+import {Gravels} from '../models';
 
-export function getNewState({row, column, state, player}) {
-  const color = state[row][column].slice(-1)
+export function getNewState({row, column, state}) {
   const {EMPTY, RED, ORANGE, GREEN} = Gravels
 
-  switch (color) {
+  switch (state[row][column]) {
     case EMPTY:
-      state[row][column] = `${player}${RED}`
+      state[row][column] = RED
       break
     case RED:
-      state[row][column] = `${player}${ORANGE}`
+      state[row][column] = ORANGE
       break
     case ORANGE:
-      state[row][column] = `${player}${GREEN}`
+      state[row][column] = GREEN
       break
   }
 
   return getDeepCopy(state)
 }
 
-export function isGravelGreen(row, column, state) {
-  return state[row][column].slice(-1) === Gravels.GREEN
+export function hasWinner(state) {
+  return hasDiagonalGoalValues(state) || hasRowGoalValues(state) || hasColumnGoalValues(state)
 }
 
-export function getWinner(state, gravel) {
-  const goalValues = getDiagonalGoalValues(state) || getRowGoalValues(state) || getColumnGoalValues(state)
-  return goalValues ? +goalValues[0][0] : isTie(state, gravel) ? Players.BOTH : null
-}
-
-export function getDiagonalGoalValues(state) {
+export function hasDiagonalGoalValues(state) {
   const leftDiagonalValues = state.map((row, i) => state[i][i])
   const rightDiagonalValues = state.map((row, i) => state[i][state.length - 1 - i])
 
-  return getGoalValues(leftDiagonalValues) || getGoalValues(rightDiagonalValues)
+  return hasGoalValues(leftDiagonalValues) || hasGoalValues(rightDiagonalValues)
 }
 
-export function getRowGoalValues(state) {
-  return state.find(row => getGoalValues(row))
+export function hasRowGoalValues(state) {
+  return state.some(row => hasGoalValues(row))
 }
 
-export function getColumnGoalValues(state) {
+export function hasColumnGoalValues(state) {
   const columns = state.map((row, i) => row.map((value, j) => state[j][i]))
-  return columns.find(column => getGoalValues(column))
+  return columns.some(column => hasGoalValues(column))
 }
 
-export function getGoalValues(values) {
-  const areGoalValues = values.every(value => value === values[0] && value !== Gravels.EMPTY)
-  return areGoalValues ? values : null
+export function hasGoalValues(values) {
+  return values.every(value => value === values[0] && value !== Gravels.EMPTY)
 }
 
 export function getDefaultState() {
@@ -59,12 +52,6 @@ export function getDefaultState() {
   ]
 
   return getDeepCopy(defaultState)
-}
-
-export function isTie(state, gravel) {
-  return state.every(row => row.every(value => gravel
-    ? value.slice(-1) !== gravel
-    : value.slice(-1) === Gravels.GREEN))
 }
 
 export function getDeepCopy(state) {

@@ -1,7 +1,6 @@
 export const Players = {
   AI: 1,
-  HUMAN: 2,
-  BOTH: 3
+  HUMAN: 2
 }
 
 export const Gravels = {
